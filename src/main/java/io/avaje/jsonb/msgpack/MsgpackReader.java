@@ -31,6 +31,11 @@ final class MsgpackReader implements JsonReader {
 	}
 
 	@Override
+	public <T> T unwrap(Class<T> aClass) {
+		return (T) this.unpacker;
+	}
+
+	@Override
 	public void beginArray() {
 		try {
 			ValueType next = this.unpacker.getNextFormat().getValueType();

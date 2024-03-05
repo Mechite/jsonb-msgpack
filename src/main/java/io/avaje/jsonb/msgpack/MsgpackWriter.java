@@ -27,6 +27,9 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	private MsgpackWriterOperator base;
 	private MsgpackWriterOperator current;
 
+	private MsgspackPropertyNames allPropertyNames;
+	private String nextPropertyName;
+
 	protected MsgpackWriter(boolean serializeNulls, boolean serializeEmpty) {
 		this.serializeNulls = serializeNulls;
 		this.serializeEmpty = serializeEmpty;
@@ -94,18 +97,22 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	}
 
 	@Override
-	public void name(int position) {
-
+	public void name(int i) {
+		this.nextPropertyName = this.allPropertyNames.names()[i];
 	}
 
 	@Override
-	public void name(String name) {
-
+	public void name(String nextPropertyName) {
+		this.nextPropertyName = nextPropertyName;
 	}
 
 	@Override
 	public void allNames(PropertyNames names) {
-
+		if (names instanceof MsgspackPropertyNames allPropertyNames) {
+			this.allPropertyNames = allPropertyNames;
+			return;
+		}
+		throw new IllegalStateException("MsgpackWriter#allNames(...) called with unsupported PropertyNames instance");
 	}
 
 	@Override
@@ -116,11 +123,13 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 			return;
 		}
 		if (this.current == null) {
-			this.current = new MsgpackWriterArrayOperator();
+			this.current = new MsgpackWriterArrayOperator(this.base);
+			this.writeNextPropertyName();
 			this.base.operation(this.current);
 			return;
 		}
 		MsgpackWriterOperator operator = new MsgpackWriterArrayOperator(this.current);
+		this.writeNextPropertyName();
 		this.current.operation(operator);
 		this.current = operator;
 	}
@@ -142,6 +151,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 			}
 
 			if (this.current == null) throw new UnsupportedOperationException("Attempted to call emptyArray() when there are no operations left");
+			this.writeNextPropertyName();
 			this.current.operation(packer -> packer.packArrayHeader(0));
 		} catch (IOException exception) {
 			throw new JsonIoException(exception);
@@ -156,17 +166,19 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 			return;
 		}
 		if (this.current == null) {
-			this.current = new MsgpackWriterMapOperator();
+			this.current = new MsgpackWriterMapOperator(this.base);
 			this.base.operation(this.current);
 			return;
 		}
 		MsgpackWriterOperator operator = new MsgpackWriterMapOperator(this.current);
+		this.writeNextPropertyName();
 		this.current.operation(operator);
 		this.current = operator;
 	}
 
 	@Override
 	public void beginObject(PropertyNames names) {
+		this.allNames(names);
 		this.beginObject();
 	}
 
@@ -182,6 +194,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void nullValue() {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(MessagePacker::packNil);
 	}
 
@@ -189,6 +202,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void value(String value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> packer.packString(value));
 	}
 
@@ -196,6 +210,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void value(boolean value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> packer.packBoolean(value));
 	}
 
@@ -203,6 +218,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void value(int value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> packer.packInt(value));
 	}
 
@@ -210,6 +226,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void value(long value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> packer.packLong(value));
 	}
 
@@ -217,6 +234,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void value(double value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> packer.packDouble(value));
 	}
 
@@ -224,6 +242,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void value(Boolean value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> packer.packBoolean(value));
 	}
 
@@ -231,6 +250,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void value(Integer value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> packer.packInt(value));
 	}
 
@@ -238,6 +258,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void value(Long value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> packer.packLong(value));
 	}
 
@@ -245,6 +266,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void value(Double value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> packer.packDouble(value));
 	}
 
@@ -257,6 +279,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void value(BigInteger value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> packer.packBigInteger(value));
 	}
 
@@ -264,6 +287,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	public void value(byte[] value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> {
 			packer.packBinaryHeader(value.length);
 			packer.writePayload(value);
@@ -300,6 +324,7 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	private void value(Map<?, ?> value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> {
 			packer.packMapHeader(value.size());
 			for (Map.Entry<?, ?> entry : value.entrySet()) {
@@ -312,12 +337,27 @@ sealed class MsgpackWriter implements JsonWriter permits MsgpackBufferedWriter, 
 	private void value(Collection<?> value) {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there is no current operation");
 		if (this.current == null) throw new UnsupportedOperationException("Attempted to call nullValue() when there are no operations left");
+		this.writeNextPropertyName();
 		this.current.operation(packer -> {
 			packer.packArrayHeader(value.size());
 			for (Object object : value) this.jsonValue(object);
 		});
 	}
 
+	/**
+	 * Writes the next property name.
+	 * This method assumes that {@link MsgpackWriter#current} is available.
+	 */
+	private void writeNextPropertyName() {
+		if (this.nextPropertyName == null) return;
+		String nextPropertyName = this.nextPropertyName;
+		this.current.operation(packer -> packer.packString(nextPropertyName));
+		this.nextPropertyName = null;
+	}
+
+	/**
+	 * Writes everything to the stream.
+	 */
 	private void assertAndWrite() {
 		if (this.base == null) throw new UnsupportedOperationException("Attempted to call assertAndWrite() with no registered operation");
 		if (this.current != null) return;

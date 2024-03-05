@@ -4,10 +4,7 @@ import io.avaje.jsonb.JsonIoException;
 import org.msgpack.core.MessagePacker;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -16,7 +13,7 @@ import java.util.function.Consumer;
 final class MsgpackWriterMapOperator implements MsgpackWriterOperator {
 
 	private final MsgpackWriterOperator parent;
-	private final Set<Consumer<MessagePacker>> operators;
+	private final Queue<Consumer<MessagePacker>> operators;
 
 	MsgpackWriterMapOperator() {
 		this(null);
@@ -24,7 +21,7 @@ final class MsgpackWriterMapOperator implements MsgpackWriterOperator {
 
 	MsgpackWriterMapOperator(MsgpackWriterOperator parent) {
 		this.parent = parent;
-		this.operators = new HashSet<>();
+		this.operators = new LinkedList<>();
 	}
 
 	@Override

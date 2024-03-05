@@ -1,5 +1,5 @@
-Sirius/jsonb-msgpack
-====================
+jsonb-msgpack
+=============
 
 	This is a simple adapter that adds support for the MessagePack binary format
 	available at https://msgpack.org/ to Avaje Jsonb.
@@ -15,37 +15,9 @@ Sirius/jsonb-msgpack
 	this does mean that you should even avoid also including that JAR as it could
 	cause a clash unless you are using JPMS.
 
-Adding the dependency
-=====================
-
 	module-info.java ===============
 	requires io.avaje.jsonb.msgpack;
 	================================
-
-	Maven ====================================
-	<repository>
-		<id>jitpack.io</id>
-		<url>https://jitpack.io</url>
-	</repository>
-	...
-	<dependency>
-		<groupId>cam.sirius</groupId>
-		<artifactId>jsonb-msgpack</artifactId>
-		<version>1u1</version>
-	</dependency>
-	==========================================
-
-	Gradle ===============================
-	maven { url "https://jitpack.io" }
-	...
-	compile "cam.sirius:jsonb-msgpack:1u1"
-	======================================
-
-	SBT =========================================================
-	resolvers += "jitpack" at "https://jitpack.io"
-	...
-	libraryDependencies += "cam.sirius" % "jsonb-msgpack" % "1u1"
-	=============================================================
 
 Public API
 ==========
@@ -93,3 +65,8 @@ Public API
 	data is able to be written, as you can simply write a byte[] and have it be translated
 	to a header, e.g., "BINARY with 928341902490120 bytes", and already know when to expect
 	the stream to end.
+
+	While the lazy evaluation technique works in this case, it leads to a single writer not
+	being reusable to write multiple root nodes (which is acceptable in most cases, however
+	if one were to use JsonWriter directly for, e.g., logging, where it might make sense to
+	keep reusing a writer, it would be detrimental).

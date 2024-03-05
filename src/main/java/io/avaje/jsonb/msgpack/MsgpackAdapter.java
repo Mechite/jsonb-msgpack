@@ -24,7 +24,7 @@ import java.io.Writer;
  * }</pre>
  *
  * <h3>Service loading initialise</h3>
- * Including the {@code cam.sirius:jsonb-msgpack} dependency in the classpath will,
+ * Including the {@code io.avaje:avaje-jsonb-msgpack} dependency in the classpath will,
  * by default, cause this adapter to be automatically selected via service loading.
  * <p>
  * Should this be undesirable, e.g., if the default constructor options for the
@@ -127,7 +127,6 @@ public class MsgpackAdapter implements JsonStreamAdapter {
 
 	@Override
 	public PropertyNames properties(String... names) {
-		return new PropertyNames() {}; // TODO - properly implement this stuff
-//		throw new UnsupportedOperationException("Not implemented yet");
+		return new MsgspackPropertyNames(names);
 	}
 }

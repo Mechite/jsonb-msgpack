@@ -1,35 +1,25 @@
 <project>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.avaje</groupId>
-    <artifactId>jsonb-msgpack</artifactId>
-    <version>1u1</version>
+	<parent>
+		<artifactId>avaje-jsonb-parent</artifactId>
+		<groupId>io.avaje</groupId>
+		<version>1.10-RC1</version>
+	</parent>
 
-    <packaging>jar</packaging>
-    <name>jsonb-msgpack</name>
+	<artifactId>avaje-jsonb-msgpack</artifactId>
+    <name>avaje-jsonb-msgpack</name>
     <description>Jsonb adapter that adds support for the MessagePack binary format.</description>
 
-    <licenses>
-        <license>
-            <name>Apache License Version 2.0</name>
-            <url>http://www.apache.org/licenses/</url>
-        </license>
-    </licenses>
-
-    <properties>
-        <java.version>17</java.version>
-
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+	<properties>
+		<java.version>17</java.version>
+	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>io.avaje</groupId>
 			<artifactId>avaje-jsonb</artifactId>
-			<version>1.7</version>
+			<version>1.10-RC1</version>
 		</dependency>
 	</dependencies>
 
@@ -38,36 +28,20 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
 
 				<configuration>
+					<release combine.self="override"/>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
 					<compilerArgs>
 						<arg>--add-exports</arg>
 						<arg>java.base/sun.nio.ch=io.avaje.jsonb.msgpack</arg>
 					</compilerArgs>
 				</configuration>
 			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>3.3.0</version>
-
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.5.0</version>
 
 				<configuration>
 					<quiet>true</quiet>
@@ -80,17 +54,7 @@
 						<additionalOption>java.base/sun.nio.ch=io.avaje.jsonb.msgpack</additionalOption>
 					</additionalOptions>
 				</configuration>
-
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>javadoc</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
-
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
@@ -107,7 +71,7 @@
 
 						<configuration>
 							<sources>
-								<source>./msgpack-java/msgpack-core/src/main/java</source>
+								<source>${project.basedir}/msgpack-java/msgpack-core/src/main/java</source>
 							</sources>
 						</configuration>
 					</execution>

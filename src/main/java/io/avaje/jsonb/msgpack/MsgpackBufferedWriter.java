@@ -1,6 +1,7 @@
 package io.avaje.jsonb.msgpack;
 
 import io.avaje.jsonb.spi.BufferedJsonWriter;
+import org.msgpack.core.MessageBufferPacker;
 import org.msgpack.core.MessagePack;
 
 import java.io.ByteArrayOutputStream;
@@ -10,16 +11,14 @@ import java.io.ByteArrayOutputStream;
  */
 final class MsgpackBufferedWriter extends MsgpackWriter implements BufferedJsonWriter {
 
-	private final ByteArrayOutputStream stream;
-
 	MsgpackBufferedWriter(boolean serializeNulls, boolean serializeEmpty) {
 		super(serializeNulls, serializeEmpty);
-		this.stream = new ByteArrayOutputStream();
-		this.packer = MessagePack.newDefaultPacker(this.stream);
+		this.packer = MessagePack.newDefaultBufferPacker();
 	}
 
 	@Override
 	public String result() {
-		return this.stream.toString();
+		MessageBufferPacker packer = (MessageBufferPacker) this.packer;
+		return new String(packer.toByteArray());
 	}
 }

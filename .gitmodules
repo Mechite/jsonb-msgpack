@@ -1,0 +1,3 @@
+[submodule "msgpack-java"]
+	path = msgpack-java
+	url = https://github.com/msgpack/msgpack-java

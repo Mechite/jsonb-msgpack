@@ -1,0 +1,95 @@
+Sirius/jsonb-msgpack
+====================
+
+	This is a simple adapter that adds support for the MessagePack binary format
+	available at https://msgpack.org/ to Avaje Jsonb.
+
+	If you include this JAR into your project (and with JPMS, the module-path),
+	there are no further steps needed to be taken if you would like to use the
+	default adapter settings; this adapter is located automagically with Java's
+	ServiceLoader by Avaje Jsonb.
+
+	Currently, the `msgpack-java` module is added as a Git submodule, meaning that
+	you do not need to separately add that dependency to your project as it is a
+	part of this source tree and the JAR artifact distributed on JitPack, however
+	this does mean that you should even avoid also including that JAR as it could
+	cause a clash unless you are using JPMS.
+
+Adding the dependency
+=====================
+
+	module-info.java ===============
+	requires io.avaje.jsonb.msgpack;
+	================================
+
+	Maven ====================================
+	<repository>
+		<id>jitpack.io</id>
+		<url>https://jitpack.io</url>
+	</repository>
+	...
+	<dependency>
+		<groupId>cam.sirius</groupId>
+		<artifactId>jsonb-msgpack</artifactId>
+		<version>1u1</version>
+	</dependency>
+	==========================================
+
+	Gradle ===============================
+	maven { url "https://jitpack.io" }
+	...
+	compile "cam.sirius:jsonb-msgpack:1u1"
+	======================================
+
+	SBT =========================================================
+	resolvers += "jitpack" at "https://jitpack.io"
+	...
+	libraryDependencies += "cam.sirius" % "jsonb-msgpack" % "1u1"
+	=============================================================
+
+Public API
+==========
+
+	The public API consists of the following classes (package io.avaje.jsonb.msgpack):
+		*	MsgpackAdapter
+		*	MsgpackAdapterFactory
+	These can be used to obtain readers and writers.
+
+	MsgpackWriter uses a lazy-evaluation style of writing in order to support the model
+	expected with JSON (where we can keep writing elements to an array or object before
+	closing it), as MessagePack requires the size of a map or array to be known before
+	adding elements as it appends only a header.
+
+	Here is a mock of how MessagePack would handle a simple JSON structure:
+		JSON:
+			{
+				"name": "John Doe",
+				"age": 20,
+				"locations": [
+					{
+						"id": 246813579024680246,
+						"address": "28/32 High St N, London E6 2HJ"
+					},
+					{
+						"id": 271828182827182818,
+						"address": "Tollgate Rd, London E6 5JP"
+					},
+				]
+			}
+		Pseudo-MessagePack (where semicolon is used as a separator):
+			MAP OF 3 ELEMENTS;
+				"name"; "John Doe";
+				"age"; 20;
+				"locations"; ARRAY OF 2 ELEMENTS;
+					MAP OF 2 ELEMENTS;
+						"id"; 246813579024680246;
+						"address"; "28/32 High St N, London E6 2HJ";
+					MAP OF 2 ELEMENTS;
+						"id"; 271828182827182818;
+						"address"; "Tollgate Rd, London E6 5JP";
+
+	As you can see here, there is no concept of a terminator. When a certain element will
+	end is dictated right at the beginning with a length field. This is also how raw binary
+	data is able to be written, as you can simply write a byte[] and have it be translated
+	to a header, e.g., "BINARY with 928341902490120 bytes", and already know when to expect
+	the stream to end.

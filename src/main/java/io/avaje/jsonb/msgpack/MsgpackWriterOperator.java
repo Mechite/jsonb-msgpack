@@ -13,7 +13,7 @@ sealed interface MsgpackWriterOperator permits MsgpackWriterArrayOperator, Msgpa
 	 * Returns the parent operator for this operator.
 	 * This should only not be present if this is the last operation in the chain (base).
 	 *
-	 * @since 1u1
+	 * @since 1.11
 	 */
 	Optional<MsgpackWriterOperator> parent();
 
@@ -26,7 +26,7 @@ sealed interface MsgpackWriterOperator permits MsgpackWriterArrayOperator, Msgpa
 	 * needed for the graph to be created as desired.
 	 *
 	 * @see MsgpackWriterOperator#operation(MessagePackerConsumer)
-	 * @since 1u1
+	 * @since 1.11
 	 */
 	default void operation(MsgpackWriterOperator operator) {
 		this.operation(operator::operate);
@@ -40,7 +40,7 @@ sealed interface MsgpackWriterOperator permits MsgpackWriterArrayOperator, Msgpa
 	 * it is operated upon.
 	 *
 	 * @see MsgpackWriterOperator#operation(MsgpackWriterOperator)
-	 * @since 1u1
+	 * @since 1.11
 	 */
 	void operation(MessagePackerConsumer operator);
 
@@ -52,7 +52,7 @@ sealed interface MsgpackWriterOperator permits MsgpackWriterArrayOperator, Msgpa
 	 * theory, re-use an operator if, e.g., a duplicate value is desired.
 	 *
 	 * @param packer The packer to run the operation against.
-	 * @since 1u1
+	 * @since 1.11
 	 */
 	void operate(MessagePacker packer);
 
@@ -60,7 +60,7 @@ sealed interface MsgpackWriterOperator permits MsgpackWriterArrayOperator, Msgpa
 	 * Extension of {@link Consumer} consuming a packer instance but allowing for {@link IOException}
 	 * to be automatically caught in the method signature and wrapped in a {@link JsonIoException}.
 	 *
-	 * @since 1u1
+	 * @since 1.11
 	 */
 	interface MessagePackerConsumer extends Consumer<MessagePacker> {
 

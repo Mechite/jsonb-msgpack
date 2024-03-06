@@ -10,7 +10,7 @@ import io.avaje.jsonb.spi.JsonStreamAdapter;
  * the classpath via {@code META-INF/services/io.avaje.jsonb.spi.AdapterFactory}).
  *
  * @see MsgpackAdapter
- * @since 1u1
+ * @since 1.11
  * @author Mechite
  */
 public final class MsgpackAdapterFactory implements AdapterFactory {

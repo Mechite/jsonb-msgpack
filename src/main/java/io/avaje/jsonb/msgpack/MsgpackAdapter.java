@@ -30,17 +30,9 @@ import java.io.Writer;
  * Should this be undesirable, e.g., if the default constructor options for the
  * serialization of null values, empty arrays, etc. is undesirable, explicitly using
  * the adapter as demonstrated above would allow this to be configured as desired.
- * <h3>Unimplemented Methods</h3>
- * <ul>
- *     <li>{@link MsgpackAdapter#bufferedWriter()}</li>
- *     <li>{@link MsgpackAdapter#bufferedWriterAsBytes()}</li>
- *     <li>{@link MsgpackAdapter#properties(String...)}</li>
- * </ul>
- * These will be implemented in a future release. {@link UnsupportedOperationException}
- * will be thrown should they be called, detail message reading <i>Not implemented yet</i>.
  *
  * @author Mechite
- * @since 1u1
+ * @since 1.11
  */
 public class MsgpackAdapter implements JsonStreamAdapter {
 
@@ -58,7 +50,7 @@ public class MsgpackAdapter implements JsonStreamAdapter {
 	 * </ul>
 	 *
 	 * @see MsgpackAdapter#MsgpackAdapter(boolean, boolean, boolean)
-	 * @since 1u1
+	 * @since 1.11
 	 */
 	public MsgpackAdapter() {
 		this(true, true, false);
@@ -72,7 +64,7 @@ public class MsgpackAdapter implements JsonStreamAdapter {
 	 * @param failOnUnknown Whether to fail when deserializing unknown properties.
 	 *
 	 * @see MsgpackAdapter#MsgpackAdapter()
-	 * @since 1u1
+	 * @since 1.11
 	 */
 	public MsgpackAdapter(boolean serializeNulls, boolean serializeEmpty, boolean failOnUnknown) {
 		this.serializeNulls = serializeNulls;

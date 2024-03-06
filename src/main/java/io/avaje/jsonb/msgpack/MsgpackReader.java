@@ -31,7 +31,7 @@ final class MsgpackReader implements JsonReader {
 	}
 
 	@Override
-	public <T> T unwrap(Class<T> aClass) {
+	public <T> T unwrap(Class<T> clazz) {
 		return (T) this.unpacker;
 	}
 

@@ -11,9 +11,8 @@ jsonb-msgpack
 
 	Currently, the `msgpack-java` module is added as a Git submodule, meaning that
 	you do not need to separately add that dependency to your project as it is a
-	part of this source tree and the JAR artifact distributed on JitPack, however
-	this does mean that you should even avoid also including that JAR as it could
-	cause a clash unless you are using JPMS.
+	part of this source tree, however this does mean that you should even avoid\
+        also including that JAR as it could cause a clash unless you are using JPMS.
 
 	module-info.java ===============
 	requires io.avaje.jsonb.msgpack;

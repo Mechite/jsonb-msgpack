@@ -4,6 +4,14 @@ jsonb-msgpack
 	This is a simple adapter that adds support for the MessagePack binary format
 	available at https://msgpack.org/ to Avaje Jsonb.
 
+	pom.xml ===============================================
+	<dependency>
+		<groupId>com.github.Mechite</groupId>
+		<artifactId>jsonb-msgpack</artifactId>
+		<version><!-- insert latest commit id --></version>
+	</dependency>
+    =======================================================
+
 	If you include this JAR into your project (and with JPMS, the module-path),
 	there are no further steps needed to be taken if you would like to use the
 	default adapter settings; this adapter is located automagically with Java's
@@ -11,19 +19,24 @@ jsonb-msgpack
 
 	Currently, the `msgpack-java` module is added as a Git submodule, meaning that
 	you do not need to separately add that dependency to your project as it is a
-	part of this source tree, however this does mean that you should even avoid\
-        also including that JAR as it could cause a clash unless you are using JPMS.
+	part of this source tree, however this does mean that you should even avoid
+	also including that JAR as it could cause a clash unless you are using JPMS.
 
 	module-info.java ===============
 	requires io.avaje.jsonb.msgpack;
 	================================
 
+	The reason a submodule was used is because msgpack-java does not support JPMS.
+	(see https://github.com/msgpack/msgpack-java/issues/749)
+
 Public API
 ==========
 
 	The public API consists of the following classes (package io.avaje.jsonb.msgpack):
+
 		*	MsgpackAdapter
 		*	MsgpackAdapterFactory
+
 	These can be used to obtain readers and writers.
 
 	MsgpackWriter uses a lazy-evaluation style of writing in order to support the model
@@ -31,39 +44,42 @@ Public API
 	closing it), as MessagePack requires the size of a map or array to be known before
 	adding elements as it appends only a header.
 
-	Here is a mock of how MessagePack would handle a simple JSON structure:
-		JSON:
-			{
-				"name": "John Doe",
-				"age": 20,
-				"locations": [
-					{
-						"id": 246813579024680246,
-						"address": "28/32 High St N, London E6 2HJ"
-					},
-					{
-						"id": 271828182827182818,
-						"address": "Tollgate Rd, London E6 5JP"
-					},
-				]
-			}
-		Pseudo-MessagePack (where semicolon is used as a separator):
-			MAP OF 3 ELEMENTS;
-				"name"; "John Doe";
-				"age"; 20;
-				"locations"; ARRAY OF 2 ELEMENTS;
-					MAP OF 2 ELEMENTS;
-						"id"; 246813579024680246;
-						"address"; "28/32 High St N, London E6 2HJ";
-					MAP OF 2 ELEMENTS;
-						"id"; 271828182827182818;
-						"address"; "Tollgate Rd, London E6 5JP";
+	Below is a mock of how MessagePack would handle a simple JSON structure.
 
-	As you can see here, there is no concept of a terminator. When a certain element will
-	end is dictated right at the beginning with a length field. This is also how raw binary
-	data is able to be written, as you can simply write a byte[] and have it be translated
-	to a header, e.g., "BINARY with 928341902490120 bytes", and already know when to expect
-	the stream to end.
+	JSON ==================================================
+	{
+		"name": "John Doe",
+		"age": 20,
+		"locations": [
+			{
+				"id": 246813579024680246,
+				"address": "28/32 High St N, London E6 2HJ"
+			},
+			{
+				"id": 271828182827182818,
+				"address": "Tollgate Rd, London E6 5JP"
+			},
+		]
+	}
+	=======================================================
+	
+	Pseudo MessagePack ==================================================================
+	0x83                                                              [map of 3 elements]
+	  name -> John Doe
+	  age -> 0x14
+	  locations -> 0x92                                             [array of 2 elements]
+	    0x82                                                          [map of 2 elements]
+	      id      -> 0xcf 0x03 0x6c 0xdb 0xa4 0x77 0x82 0x45 0x36
+	      address -> 28/32 High St N, London E6 2HJ
+	    0x82                                                          [map of 2 elements]
+	      id      -> 0xcf 0x03 0xc5 0xba 0x4a 0xc5 0x5a 0xaa 0xe2
+	      address -> Tollgate Rd, London E6 5JP
+	=====================================================================================
+
+	There is no concept of a terminator. When a certain element will end is dictated right
+	at the beginning with a length field. This is also how raw binary data is able to be
+	written, as you can simply write a byte[] and have it be translated to a header, i.e.,
+	C6 <length> <raw binary> - which tells you when the stream ends.
 
 	While the lazy evaluation technique works in this case, it leads to a single writer not
 	being reusable to write multiple root nodes (which is acceptable in most cases, however

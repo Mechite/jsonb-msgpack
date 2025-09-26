@@ -5,8 +5,15 @@ jsonb-msgpack
 	available at https://msgpack.org/ to Avaje Jsonb.
 
 	pom.xml ===============================================
+	<repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+	</repositories>
+	
 	<dependency>
-		<groupId>com.github.Mechite</groupId>
+		<groupId>com.mechite</groupId>
 		<artifactId>jsonb-msgpack</artifactId>
 		<version><!-- insert latest commit id --></version>
 	</dependency>
